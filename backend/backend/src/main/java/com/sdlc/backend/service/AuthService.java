@@ -1,3 +1,4 @@
+// AuthService.java 
 package com.sdlc.backend.service;
 
 import com.sdlc.backend.config.JwtUtil;
@@ -44,6 +45,8 @@ public class AuthService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        return jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+        Long orgId = (user.getOrganization() != null) ? user.getOrganization().getId() : null;
+
+        return jwtUtil.generateToken(user.getEmail(), user.getName(), user.getRole().name(), orgId);
     }
 }
