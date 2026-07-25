@@ -1,28 +1,50 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import AppLayout from './layout/AppLayout.jsx';
-import ProjectDashboard from './pages/projects/ProjectDashboard.jsx';
-import CreateProject from './pages/projects/CreateProject.jsx';
-import ProjectDetails from './pages/projects/ProjectDetails.jsx';
-import PortfolioDashboard from './pages/projects/PortfolioDashboard.jsx';
-import Milestones from './pages/projects/Milestones.jsx';
-import ProjectAnalytics from './pages/projects/ProjectAnalytics.jsx';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { WorkspaceProvider } from "./context/WorkspaceContext";
+import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 
-// Module 3 — Project & Portfolio Management (standalone)
-export default function App() {
+import OrganizationDashboard from "./pages/OrganizationDashboard";
+import CreateOrganization from "./pages/CreateOrganization";
+import OrganizationDetails from "./pages/OrganizationDetails";
+import TeamManagement from "./pages/TeamManagement";
+import CreateTeam from "./pages/CreateTeam";
+import TeamDetails from "./pages/TeamDetails";
+import InviteMembers from "./pages/InviteMembers";
+import MembersList from "./pages/MembersList";
+import AcceptInvite from "./pages/AcceptInvite";
+
+function App() {
   return (
-    <Routes>
-      <Route element={<AppLayout />}>
-        <Route index element={<Navigate to="/projects" replace />} />
+    <AuthProvider>
+      <WorkspaceProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Navigate to="/organizations" replace />} />
 
-        <Route path="/projects" element={<ProjectDashboard />} />
-        <Route path="/projects/new" element={<CreateProject />} />
-        <Route path="/projects/:id" element={<ProjectDetails />} />
-        <Route path="/portfolio" element={<PortfolioDashboard />} />
-        <Route path="/milestones" element={<Milestones />} />
-        <Route path="/analytics" element={<ProjectAnalytics />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/register" element={<RegisterPage />} />
 
-        <Route path="*" element={<Navigate to="/projects" replace />} />
-      </Route>
-    </Routes>
+
+            <Route path="/organizations" element={<OrganizationDashboard />} />
+            <Route path="/organizations/create" element={<CreateOrganization />} />
+            <Route path="/organizations/details" element={<OrganizationDetails />} />
+            <Route path="/organizations/details/:orgId" element={<OrganizationDetails />} />
+            <Route path="/teams" element={<TeamManagement />} />
+            <Route path="/teams/create" element={<CreateTeam />} />
+            <Route path="/teams/details" element={<TeamDetails />} />
+            <Route path="/teams/details/:teamId" element={<TeamDetails />} />
+            <Route path="/members" element={<MembersList />} />
+            <Route path="/members/invite" element={<InviteMembers />} />
+            <Route path="/accept-invite" element={<AcceptInvite />} />
+            <Route path="*" element={<Navigate to="/organizations" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </WorkspaceProvider>
+    </AuthProvider>
   );
 }
+
+export default App;
