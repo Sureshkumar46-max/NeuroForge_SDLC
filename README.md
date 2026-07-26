@@ -61,17 +61,31 @@ package — those belong to your Module 2 codebase and are intentionally left ou
    under your current Module 2 routes. Nothing about your existing routes changes.
 4. **Tailwind tokens** — if your `tailwind.config.js` doesn't already define these
    (they match your palette exactly), add them:
-   ```js
-   colors: {
-     base: '#050B18', sidebar: '#08111F', card: '#111827',
-     border: { DEFAULT: 'rgba(59,130,246,0.18)', strong: 'rgba(59,130,246,0.35)' },
-     primary: { DEFAULT: '#3B82F6', hover: '#2563EB' },
-     muted: '#94A3B8', success: '#22C55E', warning: '#F59E0B', danger: '#EF4444',
-   }
-   ```
-   The reusable classes (`.surface-card`, `.btn-primary`, `.btn-secondary`, `.input-field`,
-   `.label-text`) are defined in `src/index.css` inside an `@layer components` block —
-   copy that block into your existing global stylesheet if you don't already have equivalents.
+
+```js
+colors: {
+  base: '#050B18',
+  sidebar: '#08111F',
+  card: '#111827',
+  border: {
+    DEFAULT: 'rgba(59,130,246,0.18)',
+    strong: 'rgba(59,130,246,0.35)'
+  },
+  primary: {
+    DEFAULT: '#3B82F6',
+    hover: '#2563EB'
+  },
+  muted: '#94A3B8',
+  success: '#22C55E',
+  warning: '#F59E0B',
+  danger: '#EF4444',
+}
+```
+
+The reusable classes (`.surface-card`, `.btn-primary`, `.btn-secondary`, `.input-field`,
+`.label-text`) are defined in `src/index.css` inside an `@layer components` block —
+copy that block into your existing global stylesheet if you don't already have equivalents.
+
 5. **Wire up real data**: every page currently imports from `src/data/mockData.js`.
    Swap those imports for your real API calls / state — the shape of `projects[0]`
    in that file documents every field each component expects.

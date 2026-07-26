@@ -1,0 +1,751 @@
+###############################################################
+################## SDLC WORKFLOW TEST - MODULE 1 ###############
+#################### AUTHENTICATION ############################
+###############################################################
+
+### 1. REGISTER SUPER_ADMIN
+
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Suresh Super Admin",
+  "email": "superadmin02@gmail.com",
+  "password": "Super@123",
+  "role": "SUPER_ADMIN"
+}
+
+###
+
+### 2. LOGIN SUPER_ADMIN
+# @name superAdminLogin
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "superadmin02@gmail.com",
+  "password": "Super@123"
+}
+
+###
+
+###############################################################
+### COPY TOKEN FROM LOGIN RESPONSE
+###############################################################
+
+@superAdminToken = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJzdXBlcmFkbWluMDJAZ21haWwuY29tIiwicm9sZSI6IlNVUEVSX0FETUlOIiwiaWF0IjoxNzg0NjA0NjE2LCJleHAiOjE3ODQ2NDA2MTZ9.DjPqGkex7v94WIaNnSMimMMMwe43NCZUF9jl1gjYEUSKDxvI_WMfoHzjHzOigbQS
+
+###
+
+### 3. FORGOT PASSWORD
+
+POST http://localhost:8080/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "superadmin02@gmail.com"
+}
+
+###
+
+###############################################################
+### COPY OTP FROM EMAIL / DATABASE
+###############################################################
+
+@otp = 612021
+
+###
+
+### 4. RESET PASSWORD
+
+POST http://localhost:8080/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "email": "superadmin02@gmail.com",
+  "otp": "612021",
+  "newPassword": "Super@456"
+}
+
+###
+
+### 5. LOGIN AFTER PASSWORD RESET
+# @name superAdminLoginNew
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "superadmin02@gmail.com",
+  "password": "Super@456"
+}
+
+###
+
+###############################################################
+### COPY NEW TOKEN
+###############################################################
+
+@superAdminToken = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJzdXBlcmFkbWluMDJAZ21haWwuY29tIiwibmFtZSI6IlN1cmVzaCBTdXBlciBBZG1pbiIsInJvbGUiOiJTVVBFUl9BRE1JTiIsImlhdCI6MTc4NDgwMzY2NSwiZXhwIjoxNzg0ODM5NjY1fQ.9YMayfMYq0CyRR4ZfO9Jf1nX6BYrTTOJcdYt9HvHcLHpJK9psHzWRR4sv0etwctU
+##################### EXPECTED RESULT ##########################
+###############################################################
+
+# Register              -> 200
+# Login                 -> 200
+# Forgot Password       -> 200
+# Reset Password        -> 200
+# Login After Reset     -> 200
+
+###############################################################
+################## SDLC WORKFLOW TEST - MODULE 2 ###############
+############### ORGANIZATION & TEAM MANAGEMENT ################
+###############################################################
+
+###############################################################
+### 6. CREATE ORGANIZATION
+###############################################################
+
+POST http://localhost:8080/api/orgs
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+
+{
+  "name": "Cloud Tech Organization"
+}
+
+###
+
+###############################################################
+### SAVE ORGANIZATION ID FROM RESPONSE
+###############################################################
+
+@orgId = 50
+
+###
+
+###############################################################
+### 7. GET ORGANIZATION
+###############################################################
+
+GET http://localhost:8080/api/orgs/50
+Authorization: Bearer {{superAdminToken}}
+
+###
+
+###############################################################
+### 8. UPDATE ORGANIZATION
+###############################################################
+
+PUT http://localhost:8080/api/orgs/50
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+
+{
+  "name": "Cloud Tech Organization Updated"
+}
+
+###
+
+###############################################################
+### 9. CREATE TEAM
+###############################################################
+
+POST http://localhost:8080/api/orgs/50/teams
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+
+{
+  "name": "Backend Team Alpha"
+}
+
+###
+
+###############################################################
+### SAVE TEAM ID FROM RESPONSE
+###############################################################
+
+@teamId = 27
+
+###
+
+###############################################################
+### 10. GET ALL TEAMS
+###############################################################
+
+GET http://localhost:8080/api/orgs/50/teams
+Authorization: Bearer {{superAdminToken}}
+
+###
+
+###############################################################
+### 11. UPDATE TEAM
+###############################################################
+
+PUT http://localhost:8080/api/orgs/teams/27
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+
+{
+  "name": "Backend Team Alpha Updated"
+}
+
+###
+
+###############################################################
+### 12. DELETE TEAM (OPTIONAL - RUN LAST)
+###############################################################
+
+DELETE http://localhost:8080/api/orgs/30/teams/26
+Authorization: Bearer {{superAdminToken}}
+
+###
+
+###############################################################
+###################### EXPECTED RESULT #########################
+###############################################################
+
+# Create Organization -> 200
+# Get Organization    -> 200
+# Update Organization -> 200
+# Create Team         -> 200
+# Get All Teams       -> 200
+# Update Team         -> 200
+# Delete Team         -> 200 (Optional)
+
+
+###############################################################
+################## SDLC WORKFLOW TEST - MODULE 3 ###############
+###################### INVITE MODULE ###########################
+###############################################################
+
+###############################################################
+### USE IDs FROM PART 2
+###############################################################
+
+@invitedBy = 1
+
+###############################################################
+### 13. INVITE PROJECT_MANAGER
+###############################################################
+
+POST http://localhost:8080/api/orgs/30/invites
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+
+{
+  "email": "pm02@gmail.com",
+  "role": "PROJECT_MANAGER",
+  "teamId": {{teamId}},
+  "invitedBy": {{invitedBy}}
+}
+
+###
+
+###############################################################
+### 14. GET ALL INVITES
+###############################################################
+
+GET http://localhost:8080/api/orgs/30/invites
+Authorization: Bearer {{superAdminToken}}
+
+###
+
+###############################################################
+### COPY INVITE TOKEN FROM DATABASE (invites table)
+###############################################################
+
+@inviteToken = f26f2759-593b-4c2f-aa76-7f794e2599da
+
+###
+
+###############################################################
+### 15. VERIFY INVITE
+###############################################################
+
+GET http://localhost:8080/api/invites/verify?token={{inviteToken}}
+
+###
+
+###############################################################
+### 16. ACCEPT INVITE
+###############################################################
+
+POST http://localhost:8080/api/invites/accept
+Content-Type: application/json
+
+{
+  "token": "{{inviteToken}}",
+  "name": "Project Manager",
+  "password": "Pm@123"
+}
+
+###
+
+###############################################################
+### 17. LOGIN PROJECT_MANAGER
+###############################################################
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "pm02@gmail.com",
+  "password": "Pm@123"
+}
+
+###
+
+###############################################################
+### COPY PROJECT MANAGER TOKEN
+###############################################################
+
+@projectManagerToken = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJwbTAyQGdtYWlsLmNvbSIsInJvbGUiOiJQUk9KRUNUX01BTkFHRVIiLCJvcmdJZCI6MzAsImlhdCI6MTc4NDYwNTM1MiwiZXhwIjoxNzg0NjQxMzUyfQ.aRRFre3TbPytvl17eFxAKLJspqwWIQC3L_4IyBJqKECR9AM5qJsZWTpGEgU-dbvu
+###############################################################
+###################### EXPECTED RESULT #########################
+###############################################################
+
+# Invite Project Manager -> 200
+# Get All Invites        -> 200
+# Verify Invite          -> 200
+# Accept Invite          -> 200
+# Login Project Manager  -> 200
+
+
+###############################################################
+################## SDLC WORKFLOW TEST - part 4 ###############
+#################### PROJECT MANAGEMENT ########################
+###############################################################
+
+###############################################################
+### 18. CREATE PROJECT
+###############################################################
+
+POST http://localhost:8080/api/projects
+Authorization: Bearer {{projectManagerToken}}
+Content-Type: application/json
+
+{
+  "name": "Inventory Management System",
+  "description": "Inventory Management Project",
+  "methodology": "AGILE",
+  "techStackTags": "Java,Spring Boot,React,PostgreSQL",
+  "startDate": "2026-07-21",
+  "endDate": "2026-12-31",
+  "status": "ACTIVE"
+}
+
+###
+
+###############################################################
+### SAVE PROJECT ID FROM RESPONSE
+###############################################################
+
+@projectId = 15
+
+###
+
+###############################################################
+### 19. GET ALL PROJECTS
+###############################################################
+
+GET http://localhost:8080/api/projects
+Authorization: Bearer {{projectManagerToken}}
+
+###
+
+###############################################################
+### 20. GET PROJECT BY ID
+###############################################################
+
+GET http://localhost:8080/api/projects/15
+Authorization: Bearer {{projectManagerToken}}
+
+###
+
+###############################################################
+### 21. UPDATE PROJECT
+###############################################################
+
+PUT http://localhost:8080/api/projects/15
+Authorization: Bearer {{projectManagerToken}}
+Content-Type: application/json
+
+{
+  "name": "Inventory Management System Updated",
+  "description": "Updated Inventory Project",
+  "methodology": "AGILE",
+  "techStackTags": "Java,Spring Boot,React,PostgreSQL,Docker",
+  "startDate": "2026-07-21",
+  "endDate": "2026-12-31",
+  "status": "ACTIVE"
+}
+
+###
+
+###############################################################
+### 22. ASSIGN TEAM TO PROJECT
+###############################################################
+
+PUT http://localhost:8080/api/projects/15/team/21
+Authorization: Bearer {{projectManagerToken}}
+
+###
+
+###############################################################
+### 23. GET PROJECTS AGAIN
+###############################################################
+
+GET http://localhost:8080/api/projects
+Authorization: Bearer {{projectManagerToken}}
+
+###
+
+###############################################################
+### 24. DELETE PROJECT (RUN LAST ONLY)
+###############################################################
+
+DELETE http://localhost:8080/api/projects/{{projectId}}
+Authorization: Bearer {{projectManagerToken}}
+
+###
+
+###############################################################
+###################### EXPECTED RESULT #########################
+###############################################################
+
+# Create Project      -> 200
+# Get All Projects    -> 200
+# Get Project By ID   -> 200
+# Update Project      -> 200
+# Assign Team         -> 200
+# Get Projects Again  -> 200
+# Delete Project      -> 200 (Run only after completing all remaining modules)
+
+
+###############################################################
+################## SDLC WORKFLOW TEST - MODULE 5 ###############
+################### MILESTONE MANAGEMENT #######################
+###############################################################
+
+###############################################################
+### 25. CREATE MILESTONE
+###############################################################
+
+POST http://localhost:8080/api/projects/15/milestones
+Authorization: Bearer {{projectManagerToken}}
+Content-Type: application/json
+
+{
+  "title": "Requirement Analysis",
+  "description": "Complete requirement gathering",
+  "dueDate": "2026-08-05",
+  "status": "PENDING"
+}
+
+###
+
+###############################################################
+### SAVE MILESTONE ID FROM RESPONSE
+###############################################################
+
+@milestoneId = 6
+
+###
+
+###############################################################
+### 26. GET ALL MILESTONES
+###############################################################
+
+GET http://localhost:8080/api/projects/15/milestones
+Authorization: Bearer {{projectManagerToken}}
+
+###
+
+###############################################################
+### 27. UPDATE MILESTONE
+###############################################################
+
+PUT http://localhost:8080/api/milestones/6
+Authorization: Bearer {{projectManagerToken}}
+Content-Type: application/json
+
+{
+  "title": "Requirement Analysis Updated",
+  "description": "Requirements approved",
+  "dueDate": "2026-08-10",
+  "status": "COMPLETED"
+}
+
+###
+
+###############################################################
+### 28. GET ALL MILESTONES AGAIN
+###############################################################
+
+GET http://localhost:8080/api/projects/15/milestones
+Authorization: Bearer {{projectManagerToken}}
+
+###
+
+###############################################################
+### 29. DELETE MILESTONE (RUN LAST)
+###############################################################
+
+DELETE http://localhost:8080/api/milestones/6
+Authorization: Bearer {{projectManagerToken}}
+
+###
+
+###############################################################
+###################### EXPECTED RESULT #########################
+###############################################################
+
+# Create Milestone      -> 200
+# Get All Milestones    -> 200
+# Update Milestone      -> 200
+# Get Milestones Again  -> 200
+# Delete Milestone      -> 200 (Run after all milestone testing)
+
+###############################################################
+################## SDLC WORKFLOW TEST - part 6 ###############
+################## PROJECT MEMBER MANAGEMENT ###################
+###############################################################
+
+###############################################################
+### 30. REGISTER DEVELOPER
+###############################################################
+
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Developer 01",
+  "email": "developer01@gmail.com",
+  "password": "Dev@123",
+  "role": "DEVELOPER"
+}
+
+###
+
+
+### 17. LOGIN PROJECT_MANAGER
+###############################################################
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "developer01@gmail.com",
+  "password": "Dev@123"
+}
+
+###############################################################
+### SAVE DEVELOPER USER ID FROM DATABASE
+###############################################################
+
+# PostgreSQL:
+# SELECT id, name, email
+# FROM users
+# WHERE email='developer01@gmail.com';
+
+@developerUserId = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJkZXZlbG9wZXIwMUBnbWFpbC5jb20iLCJyb2xlIjoiREVWRUxPUEVSIiwiaWF0IjoxNzg0NjA2MTQwLCJleHAiOjE3ODQ2NDIxNDB9.-6BO32F80HxFMbvqQE6GMMwFRc5AslbVRKWbKyVAp5Ayeh88qcS6ckpMBB7aj6xm
+
+###
+
+###############################################################
+### 31. ADD PROJECT MEMBER
+###############################################################
+
+POST http://localhost:8080/api/projects/15/members?userId=8&projectRole=DEVELOPER
+Authorization: Bearer {{projectManagerToken}}
+
+###
+
+###############################################################
+### 32. GET ALL PROJECT MEMBERS
+###############################################################
+
+GET http://localhost:8080/api/projects/15/members
+Authorization: Bearer {{projectManagerToken}}
+
+###
+
+###############################################################
+### SAVE PROJECT MEMBER ID FROM RESPONSE
+###############################################################
+
+@projectMemberId = 6
+
+###
+
+###############################################################
+### 33. REMOVE PROJECT MEMBER
+###############################################################
+
+DELETE http://localhost:8080/api/projects/members/6
+Authorization: Bearer {{projectManagerToken}}
+
+###
+
+###############################################################
+### 34. GET PROJECT MEMBERS AGAIN
+###############################################################
+
+GET http://localhost:8080/api/projects/15/members
+Authorization: Bearer {{projectManagerToken}}
+
+###
+
+###############################################################
+###################### EXPECTED RESULT #########################
+###############################################################
+
+# Register Developer    -> 200
+# Add Project Member    -> 200
+# Get Project Members   -> 200
+# Remove Project Member -> 200
+# Get Members Again     -> 200
+
+
+###############################################################
+################## SDLC WORKFLOW TEST - MODULE 7 ###############
+###################### QA ROLE TESTING #########################
+###############################################################
+
+###############################################################
+### 35. REGISTER QA TESTER
+###############################################################
+
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "QA Tester 02",
+  "email": "qa02@gmail.com",
+  "password": "Qa@123",
+  "role": "QA_TESTER"
+}
+
+###
+
+###############################################################
+### 36. LOGIN QA TESTER
+###############################################################
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "qa02@gmail.com",
+  "password": "Qa@123"
+}
+
+###
+
+###############################################################
+### COPY QA TOKEN
+###############################################################
+
+@qaTesterToken = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJxYTAyQGdtYWlsLmNvbSIsInJvbGUiOiJRQV9URVNURVIiLCJpYXQiOjE3ODQ2MDY2NjUsImV4cCI6MTc4NDY0MjY2NX0.3PJdssPcpUWmzl5V5ykfLupQGQsrHcKlI44gwLngYoqH-MS5fsvYg4gbHHZKCgDI
+
+###
+
+###############################################################
+### 37. GET ALL PROJECTS (Should Return 200)
+###############################################################
+
+GET http://localhost:8080/api/projects
+Authorization: Bearer {{qaTesterToken}}
+
+###
+
+###############################################################
+### 38. GET PROJECT BY ID (Should Return 200)
+###############################################################
+
+GET http://localhost:8080/api/projects/{{projectId}}
+Authorization: Bearer {{qaTesterToken}}
+
+###
+
+###############################################################
+### 39. GET ALL MILESTONES (Should Return 200)
+###############################################################
+
+GET http://localhost:8080/api/projects/{{projectId}}/milestones
+Authorization: Bearer {{qaTesterToken}}
+
+###
+
+###############################################################
+### 40. GET PROJECT MEMBERS (Should Return 200)
+###############################################################
+
+GET http://localhost:8080/api/projects/{{projectId}}/members
+Authorization: Bearer {{qaTesterToken}}
+
+###
+
+###############################################################
+### 41. CREATE PROJECT (Should Return 403)
+###############################################################
+
+POST http://localhost:8080/api/projects
+Authorization: Bearer {{qaTesterToken}}
+Content-Type: application/json
+
+{
+  "name": "Unauthorized Project",
+  "description": "QA should not create project",
+  "methodology": "AGILE",
+  "techStackTags": "Java",
+  "startDate": "2026-08-01",
+  "endDate": "2026-12-31",
+  "status": "ACTIVE"
+}
+
+###
+
+###############################################################
+### 42. UPDATE PROJECT (Should Return 403)
+###############################################################
+
+PUT http://localhost:8080/api/projects/{{projectId}}
+Authorization: Bearer {{qaTesterToken}}
+Content-Type: application/json
+
+{
+  "name": "Hacked Project",
+  "description": "QA cannot update",
+  "methodology": "AGILE",
+  "techStackTags": "Java",
+  "startDate": "2026-08-01",
+  "endDate": "2026-12-31",
+  "status": "ACTIVE"
+}
+
+###
+
+###############################################################
+### 43. DELETE PROJECT (Should Return 403)
+###############################################################
+
+DELETE http://localhost:8080/api/projects/{{projectId}}
+Authorization: Bearer {{qaTesterToken}}
+
+###
+
+###############################################################
+###################### EXPECTED RESULT #########################
+###############################################################
+
+# Register QA             -> 200
+# Login QA                -> 200
+# Get All Projects        -> 200
+# Get Project By ID       -> 200
+# Get Milestones          -> 200
+# Get Project Members     -> 200
+# Create Project          -> 403
+# Update Project          -> 403
+# Delete Project          -> 403
