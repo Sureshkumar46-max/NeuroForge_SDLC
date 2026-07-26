@@ -2,10 +2,10 @@ import { Outlet } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
 import Sidebar from './Sidebar.jsx';
 import Header from './Header.jsx';
-import { useWorkspace } from '../context/WorkspaceContext.jsx';
+import { useWorkspaceUI } from '../context/WorkspaceUIContext.jsx';
 
 function SignedOutOverlay() {
-  const { signBackIn } = useWorkspace();
+  const { signBackIn } = useWorkspaceUI();
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-base/95 p-4 backdrop-blur-md animate-fade-in">
       <div className="surface-card w-full max-w-sm p-7 text-center">
@@ -25,7 +25,7 @@ function SignedOutOverlay() {
 }
 
 export default function AppLayout() {
-  const { collapsed, signedOut } = useWorkspace();
+  const { collapsed, signedOut } = useWorkspaceUI();
 
   return (
     <div

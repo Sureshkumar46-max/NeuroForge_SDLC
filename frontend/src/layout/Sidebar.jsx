@@ -8,7 +8,7 @@ import {
   ChevronsRight,
   LogOut,
 } from 'lucide-react';
-import { useWorkspace } from '../context/WorkspaceContext.jsx';
+import { useWorkspaceUI } from '../context/WorkspaceUIContext.jsx';
 
 // Module 3 — Project & Portfolio Management.
 // In your real app, this section slots in alongside your existing
@@ -29,7 +29,7 @@ const navSections = [
 const ROLE_STYLE = 'text-primary bg-primary/10 border-primary/30';
 
 export default function Sidebar() {
-  const { collapsed, toggleCollapsed, signOut } = useWorkspace();
+  const { collapsed, toggleCollapsed, signOut } = useWorkspaceUI();
 
   return (
     <aside

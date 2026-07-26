@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 
-const WorkspaceContext = createContext(null);
+const WorkspaceUIContext = createContext(null);
 
 const INITIAL_NOTIFICATIONS = [
   { id: 'n1', text: 'Project Created — "AI Code Review Copilot"', time: '10 min ago', read: false },
@@ -9,7 +9,7 @@ const INITIAL_NOTIFICATIONS = [
   { id: 'n4', text: 'Project Archived — "Requirement Traceability Engine"', time: '1 day ago', read: true },
 ];
 
-export function WorkspaceProvider({ children }) {
+export function WorkspaceUIProvider({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
   const [signedOut, setSignedOut] = useState(false);
@@ -33,7 +33,7 @@ export function WorkspaceProvider({ children }) {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
-    <WorkspaceContext.Provider
+    <WorkspaceUIContext.Provider
       value={{
         collapsed,
         toggleCollapsed,
@@ -47,12 +47,12 @@ export function WorkspaceProvider({ children }) {
       }}
     >
       {children}
-    </WorkspaceContext.Provider>
+    </WorkspaceUIContext.Provider>
   );
 }
 
-export function useWorkspace() {
-  const ctx = useContext(WorkspaceContext);
-  if (!ctx) throw new Error('useWorkspace must be used within a WorkspaceProvider');
+export function useWorkspaceUI() {
+  const ctx = useContext(WorkspaceUIContext);
+  if (!ctx) throw new Error('useWorkspaceUI must be used within a WorkspaceUIProvider');
   return ctx;
 }

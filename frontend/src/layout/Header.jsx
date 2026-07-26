@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { ChevronDown, Bell, Search, Settings, LogOut, User } from 'lucide-react';
 import useDismiss from '../hooks/useDismiss.js';
-import { useWorkspace } from '../context/WorkspaceContext.jsx';
+import { useWorkspaceUI } from '../context/WorkspaceUIContext.jsx';
 import NotificationsPanel from '../components/common/NotificationsPanel.jsx';
 import InfoModal from '../components/common/InfoModal.jsx';
 
@@ -14,7 +14,7 @@ const SETTINGS_ITEMS = [
 ];
 
 export default function Header() {
-  const { notifications, unreadCount, markAllRead, signOut } = useWorkspace();
+  const { notifications, unreadCount, markAllRead, signOut } = useWorkspaceUI();
 
   const [orgOpen, setOrgOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState(ORG_OPTIONS[0]);
