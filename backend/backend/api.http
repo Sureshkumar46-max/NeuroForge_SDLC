@@ -749,3 +749,156 @@ Authorization: Bearer {{qaTesterToken}}
 # Create Project          -> 403
 # Update Project          -> 403
 # Delete Project          -> 403
+
+
+### 1. Invite a Project Manager
+POST http://localhost:8080/api/orgs/{{orgId}}/invites
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+
+{
+  "email": "rg@gmail.com",
+  "role": "PROJECT_MANAGER"
+}
+
+### 2. Accept Invite
+POST http://localhost:8080/api/invites/accept
+Content-Type: application/json
+
+{
+  "token": "d79b5b24-4683-414c-9a77-d95707d96abe",
+  "name": "RG Test",
+  "password": "Test@1234"
+}
+
+### 3. Login as RG (Project Manager)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rg@gmail.com",
+  "password": "Rgggg@46"
+}
+
+### 4. Create Project as RG
+POST http://localhost:8080/api/projects
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyZ0BnbWFpbC5jb20iLCJuYW1lIjoiUmciLCJyb2xlIjoiUFJPSkVDVF9NQU5BR0VSIiwib3JnSWQiOjUwLCJpYXQiOjE3ODUwODY4NDQsImV4cCI6MTc4NTEyMjg0NH0.NsdEerv2nBM24mBumI7pUdDjP5yeiVfMX4zM97jyZ4IsGiLc8Ef1BPe20lDIxhyb
+Content-Type: application/json
+
+{
+  "name": "Test Project via RG",
+  "methodology": "Agile",
+  "startDate": "2026-08-01",
+  "endDate": "2026-12-01",
+  "techStackTags": "React,Spring Boot",
+  "priority": "Medium",
+  "description": "Testing PM project creation"
+}
+
+### Login first to get token
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rg@gmail.com",
+  "password": "Rgggg@46"
+}
+
+### Create Milestone (replace TOKEN and projectId)
+POST http://localhost:8080/api/projects/18/milestones
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyZ0BnbWFpbC5jb20iLCJuYW1lIjoiUmciLCJyb2xlIjoiUFJPSkVDVF9NQU5BR0VSIiwib3JnSWQiOjUwLCJpYXQiOjE3ODUxNjM4NjksImV4cCI6MTc4NTE5OTg2OX0.9SeEuzhPJaqdtmtGsrVo4wDcm5dYZuDK3PSkUM5deNFkG8HuFP3ubqV6h0XSnjGn
+
+{
+  "title": "Test Milestone",
+  "dueDate": "2026-08-15",
+  "status": "On Track"
+}
+
+
+### Create a sprint
+POST http://localhost:8080/api/sprints
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyZ0BnbWFpbC5jb20iLCJuYW1lIjoiUmciLCJyb2xlIjoiUFJPSkVDVF9NQU5BR0VSIiwib3JnSWQiOjUwLCJpYXQiOjE3ODUyMzkyOTgsImV4cCI6MTc4NTI3NTI5OH0.qFRfW9xx5Hgo2Q3zK6YMqx8yGCIC4fs5HJGKUR-sECpUoRgjJEBK45NvHQyQia5U
+
+{
+  "projectId": 18,
+  "name": "Sprint 1",
+  "goal": "Set up core backlog and board",
+  "startDate": "2026-07-28",
+  "endDate": "2026-08-11"
+}
+
+### Get sprints for a project
+GET http://localhost:8080/api/sprints/project/18
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyZ0BnbWFpbC5jb20iLCJuYW1lIjoiUmciLCJyb2xlIjoiUFJPSkVDVF9NQU5BR0VSIiwib3JnSWQiOjUwLCJpYXQiOjE3ODUyMzkyOTgsImV4cCI6MTc4NTI3NTI5OH0.qFRfW9xx5Hgo2Q3zK6YMqx8yGCIC4fs5HJGKUR-sECpUoRgjJEBK45NvHQyQia5U
+
+
+### Get one sprint (with stats)
+GET http://localhost:8080/api/sprints/1
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyZ0BnbWFpbC5jb20iLCJuYW1lIjoiUmciLCJyb2xlIjoiUFJPSkVDVF9NQU5BR0VSIiwib3JnSWQiOjUwLCJpYXQiOjE3ODUyMzkyOTgsImV4cCI6MTc4NTI3NTI5OH0.qFRfW9xx5Hgo2Q3zK6YMqx8yGCIC4fs5HJGKUR-sECpUoRgjJEBK45NvHQyQia5U
+
+
+### Start the sprint
+PATCH http://localhost:8080/api/sprints/1/start
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyZ0BnbWFpbC5jb20iLCJuYW1lIjoiUmciLCJyb2xlIjoiUFJPSkVDVF9NQU5BR0VSIiwib3JnSWQiOjUwLCJpYXQiOjE3ODUyMzkyOTgsImV4cCI6MTc4NTI3NTI5OH0.qFRfW9xx5Hgo2Q3zK6YMqx8yGCIC4fs5HJGKUR-sECpUoRgjJEBK45NvHQyQia5U
+
+
+### Create a task in the sprint
+POST http://localhost:8080/api/tasks
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyZ0BnbWFpbC5jb20iLCJuYW1lIjoiUmciLCJyb2xlIjoiUFJPSkVDVF9NQU5BR0VSIiwib3JnSWQiOjUwLCJpYXQiOjE3ODUyMzkyOTgsImV4cCI6MTc4NTI3NTI5OH0.qFRfW9xx5Hgo2Q3zK6YMqx8yGCIC4fs5HJGKUR-sECpUoRgjJEBK45NvHQyQia5U
+
+{
+  "projectId": 18,
+  "sprintId": 1,
+  "title": "Build login API",
+  "description": "JWT based login endpoint",
+  "priority": "HIGH",
+  "storyPoints": 5,
+  
+  "labels": "backend,auth",
+  "specRequirementRef": "REQ-101"
+}
+
+### Create a backlog task (no sprint)
+POST http://localhost:8080/api/tasks
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyZ0BnbWFpbC5jb20iLCJuYW1lIjoiUmciLCJyb2xlIjoiUFJPSkVDVF9NQU5BR0VSIiwib3JnSWQiOjUwLCJpYXQiOjE3ODUyMzkyOTgsImV4cCI6MTc4NTI3NTI5OH0.qFRfW9xx5Hgo2Q3zK6YMqx8yGCIC4fs5HJGKUR-sECpUoRgjJEBK45NvHQyQia5U
+
+{
+  "projectId": 18,
+  "title": "Design settings page",
+  "priority": "LOW"
+}
+
+### Get backlog for a project
+GET http://localhost:8080/api/tasks/backlog/1
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyZ0BnbWFpbC5jb20iLCJuYW1lIjoiUmciLCJyb2xlIjoiUFJPSkVDVF9NQU5BR0VSIiwib3JnSWQiOjUwLCJpYXQiOjE3ODUyMzkyOTgsImV4cCI6MTc4NTI3NTI5OH0.qFRfW9xx5Hgo2Q3zK6YMqx8yGCIC4fs5HJGKUR-sECpUoRgjJEBK45NvHQyQia5U
+
+
+### Get the Kanban board for a sprint
+GET http://localhost:8080/api/tasks/board/1
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyZ0BnbWFpbC5jb20iLCJuYW1lIjoiUmciLCJyb2xlIjoiUFJPSkVDVF9NQU5BR0VSIiwib3JnSWQiOjUwLCJpYXQiOjE3ODUyMzkyOTgsImV4cCI6MTc4NTI3NTI5OH0.qFRfW9xx5Hgo2Q3zK6YMqx8yGCIC4fs5HJGKUR-sECpUoRgjJEBK45NvHQyQia5U
+
+### Move a task to In Progress
+PATCH http://localhost:8080/api/tasks/1/status
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyZ0BnbWFpbC5jb20iLCJuYW1lIjoiUmciLCJyb2xlIjoiUFJPSkVDVF9NQU5BR0VSIiwib3JnSWQiOjUwLCJpYXQiOjE3ODUyMzkyOTgsImV4cCI6MTc4NTI3NTI5OH0.qFRfW9xx5Hgo2Q3zK6YMqx8yGCIC4fs5HJGKUR-sECpUoRgjJEBK45NvHQyQia5U
+
+{
+  "status": "IN_PROGRESS"
+}
+
+### Move a task to Done (only QA/PM/ORG_ADMIN/SUPER_ADMIN allowed)
+PATCH http://localhost:8080/api/tasks/1/status
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyZ0BnbWFpbC5jb20iLCJuYW1lIjoiUmciLCJyb2xlIjoiUFJPSkVDVF9NQU5BR0VSIiwib3JnSWQiOjUwLCJpYXQiOjE3ODUyMzkyOTgsImV4cCI6MTc4NTI3NTI5OH0.qFRfW9xx5Hgo2Q3zK6YMqx8yGCIC4fs5HJGKUR-sECpUoRgjJEBK45NvHQyQia5U
+
+{
+  "status": "DONE"
+}
+
+### Complete the sprint
+PATCH http://localhost:8080/api/sprints/1/complete
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyZ0BnbWFpbC5jb20iLCJuYW1lIjoiUmciLCJyb2xlIjoiUFJPSkVDVF9NQU5BR0VSIiwib3JnSWQiOjUwLCJpYXQiOjE3ODUyMzkyOTgsImV4cCI6MTc4NTI3NTI5OH0.qFRfW9xx5Hgo2Q3zK6YMqx8yGCIC4fs5HJGKUR-sECpUoRgjJEBK45NvHQyQia5U

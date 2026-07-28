@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { WorkspaceProvider } from "./context/WorkspaceContext";
 import { WorkspaceUIProvider } from "./context/WorkspaceUIContext";
 import { ProjectsProvider } from "./context/ProjectsContext";
@@ -18,13 +18,26 @@ import InviteMembers from "./pages/InviteMembers";
 import MembersList from "./pages/MembersList";
 import AcceptInvite from "./pages/AcceptInvite";
 
-import AppLayout from "./layout/AppLayout";
 import ProjectDashboard from "./pages/projects/ProjectDashboard";
 import CreateProject from "./pages/projects/CreateProject";
 import ProjectDetails from "./pages/projects/ProjectDetails";
 import PortfolioDashboard from "./pages/projects/PortfolioDashboard";
 import Milestones from "./pages/projects/Milestones";
 import ProjectAnalytics from "./pages/projects/ProjectAnalytics";
+
+function HomeRedirect() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user.role === "PM") {
+    return <Navigate to="/projects" replace />;
+  }
+
+  return <Navigate to="/organizations" replace />;
+}
 
 function App() {
   return (
@@ -34,7 +47,7 @@ function App() {
           <ProjectsProvider>
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Navigate to="/organizations" replace />} />
+                <Route path="/" element={<HomeRedirect />} />
 
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -52,17 +65,14 @@ function App() {
                 <Route path="/members/invite" element={<InviteMembers />} />
                 <Route path="/accept-invite" element={<AcceptInvite />} />
 
-                {/* Module 3 — Project & Portfolio Management */}
-                <Route element={<AppLayout />}>
-                  <Route path="/projects" element={<ProjectDashboard />} />
-                  <Route path="/projects/new" element={<CreateProject />} />
-                  <Route path="/projects/:id" element={<ProjectDetails />} />
-                  <Route path="/portfolio" element={<PortfolioDashboard />} />
-                  <Route path="/milestones" element={<Milestones />} />
-                  <Route path="/analytics" element={<ProjectAnalytics />} />
-                </Route>
+                <Route path="/projects" element={<ProjectDashboard />} />
+                <Route path="/projects/new" element={<CreateProject />} />
+                <Route path="/projects/:id" element={<ProjectDetails />} />
+                <Route path="/portfolio" element={<PortfolioDashboard />} />
+                <Route path="/milestones" element={<Milestones />} />
+                <Route path="/analytics" element={<ProjectAnalytics />} />
 
-                <Route path="*" element={<Navigate to="/organizations" replace />} />
+                <Route path="*" element={<HomeRedirect />} />
               </Routes>
             </BrowserRouter>
           </ProjectsProvider>
