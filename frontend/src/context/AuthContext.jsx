@@ -28,6 +28,7 @@ function normalizeRole(rawRole) {
       ORGADMIN: "Org Admin",
       ORG_ADMIN: "Org Admin",
       PM: "PM",
+      PROJECT_MANAGER: "PM",
       QA: "QA",
       DEVELOPER: "Developer",
       CLIENT: "Client",

@@ -1,32 +1,31 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Rocket, UploadCloud, X } from 'lucide-react';
-import PageHeader from '../../components/projects/PageHeader.jsx';
-import Select from '../../components/common/Select.jsx';
-import { organizations, teams, managers } from '../../data/mockData.js';
-import { useProjects } from '../../context/ProjectsContext.jsx';
-import { useWorkspace } from '../../context/WorkspaceContext.jsx';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { UploadCloud, X, Rocket } from "lucide-react";
+import WorkspaceLayout from "../../components/WorkspaceLayout";
+import Card from "../../components/Card";
+import Button from "../../components/Button";
+import { organizations, teams, managers } from "../../data/mockData.js";
+import { useProjects } from "../../context/ProjectsContext.jsx";
 
-const METHODOLOGIES = ['Agile', 'Scrum', 'Kanban', 'Waterfall'];
-const PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
+const METHODOLOGIES = ["Agile", "Scrum", "Kanban", "Waterfall"];
+const PRIORITIES = ["Low", "Medium", "High", "Critical"];
 
 export default function CreateProject() {
   const navigate = useNavigate();
   const { addProject } = useProjects();
-  const { pushNotification } = useWorkspace();
 
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [organization, setOrganization] = useState(organizations[0]);
   const [team, setTeam] = useState(teams[0]);
   const [manager, setManager] = useState(managers[0]);
   const [priority, setPriority] = useState(PRIORITIES[1]);
   const [methodology, setMethodology] = useState(METHODOLOGIES[0]);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
-  const [techInput, setTechInput] = useState('');
-  const [techStack, setTechStack] = useState(['React', 'Spring Boot']);
+  const [techInput, setTechInput] = useState("");
+  const [techStack, setTechStack] = useState(["React", "Spring Boot"]);
   const [logoName, setLogoName] = useState(null);
 
   const addTech = (e) => {
@@ -34,7 +33,7 @@ export default function CreateProject() {
     const val = techInput.trim();
     if (val && !techStack.includes(val)) {
       setTechStack([...techStack, val]);
-      setTechInput('');
+      setTechInput("");
     }
   };
 
@@ -42,8 +41,8 @@ export default function CreateProject() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const created = addProject({
-      name: name.trim() || 'Untitled Project',
+    addProject({
+      name: name.trim() || "Untitled Project",
       description,
       organization,
       team,
@@ -54,138 +53,158 @@ export default function CreateProject() {
       endDate,
       techStack,
     });
-    pushNotification(`Project Created — "${created.name}"`);
-    navigate('/projects');
+    navigate("/projects");
   };
 
+  const labelStyle = { fontSize: "12px", fontWeight: 600, color: "var(--ink-soft)", marginBottom: "6px", display: "block" };
+  const rowStyle = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" };
+
   return (
-    <div className="mx-auto max-w-4xl">
-      <PageHeader
-        icon={Rocket}
-        title="Create Project"
-        description="Set up a new project inside your organization's portfolio."
-      />
+    <WorkspaceLayout
+      title="Create Project"
+      subtitle="Set up a new project inside your organization's portfolio."
+      pageClassName="create-project-page"
+    >
+      <Card title="Project Basics">
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: "16px" }}>
+            <label style={labelStyle}>Project Name</label>
+            <input
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. NeuroBot AI Assistant"
+            />
+          </div>
 
-      <form onSubmit={handleSubmit} className="surface-card space-y-7 p-6 lg:p-8">
-        {/* Basics */}
-        <section>
-          <h3 className="mb-4 text-sm font-semibold text-white">Project Basics</h3>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <div className="md:col-span-2">
-              <label className="label-text">Project Name</label>
+          <div style={{ marginBottom: "16px" }}>
+            <label style={labelStyle}>Description</label>
+            <textarea
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Briefly describe the goal of this project…"
+              style={{ width: "100%", resize: "none" }}
+            />
+          </div>
+
+          <div style={rowStyle}>
+            <div>
+              <label style={labelStyle}>Organization</label>
+              <select value={organization} onChange={(e) => setOrganization(e.target.value)}>
+                {organizations.map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Team</label>
+              <select value={team} onChange={(e) => setTeam(e.target.value)}>
+                {teams.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div style={rowStyle}>
+            <div>
+              <label style={labelStyle}>Project Manager</label>
+              <select value={manager} onChange={(e) => setManager(e.target.value)}>
+                {managers.map((m) => <option key={m} value={m}>{m}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Priority</label>
+              <select value={priority} onChange={(e) => setPriority(e.target.value)}>
+                {PRIORITIES.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "16px", marginBottom: "16px" }}>
+            <h4 style={{ marginBottom: "12px" }}>Methodology &amp; Timeline</h4>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
+              <div>
+                <label style={labelStyle}>Methodology</label>
+                <select value={methodology} onChange={(e) => setMethodology(e.target.value)}>
+                  {METHODOLOGIES.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Start Date</label>
+                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+              </div>
+              <div>
+                <label style={labelStyle}>End Date</label>
+                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+              </div>
+            </div>
+          </div>
+
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "16px", marginBottom: "16px" }}>
+            <h4 style={{ marginBottom: "12px" }}>Technology Stack</h4>
+            <div className="pill-row" style={{ marginBottom: "10px" }}>
+              {techStack.map((t) => (
+                <span key={t} className="pill">
+                  {t}
+                  <button
+                    type="button"
+                    onClick={() => removeTech(t)}
+                    style={{ marginLeft: "6px", background: "transparent", border: "none", color: "inherit", cursor: "pointer" }}
+                  >
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: "8px" }}>
               <input
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="input-field"
-                placeholder="e.g. NeuroBot AI Assistant"
+                value={techInput}
+                onChange={(e) => setTechInput(e.target.value)}
+                placeholder="Add a technology and press Add…"
+                style={{ flex: 1 }}
               />
+              <Button variant="secondary" onClick={addTech}>Add</Button>
             </div>
-            <div className="md:col-span-2">
-              <label className="label-text">Description</label>
-              <textarea
-                rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="input-field resize-none"
-                placeholder="Briefly describe the goal of this project…"
+          </div>
+
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "16px", marginBottom: "16px" }}>
+            <h4 style={{ marginBottom: "12px" }}>Project Logo</h4>
+            <label
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                border: "1px dashed rgba(255,255,255,0.2)",
+                borderRadius: "12px",
+                padding: "32px",
+                cursor: "pointer",
+                textAlign: "center",
+              }}
+            >
+              <UploadCloud size={22} color="var(--ink-soft)" />
+              <p style={{ fontSize: "13px", color: "var(--ink-soft)" }}>
+                {logoName ? logoName : "Click to upload or drag and drop"}
+              </p>
+              <p style={{ fontSize: "11px", color: "var(--ink-soft)" }}>PNG or SVG, up to 2MB</p>
+              <input
+                type="file"
+                style={{ display: "none" }}
+                accept="image/*"
+                onChange={(e) => setLogoName(e.target.files?.[0]?.name ?? null)}
               />
-            </div>
-            <div>
-              <label className="label-text">Organization</label>
-              <Select value={organization} onChange={setOrganization} options={organizations} />
-            </div>
-            <div>
-              <label className="label-text">Team</label>
-              <Select value={team} onChange={setTeam} options={teams} />
-            </div>
-            <div>
-              <label className="label-text">Project Manager</label>
-              <Select value={manager} onChange={setManager} options={managers} />
-            </div>
-            <div>
-              <label className="label-text">Priority</label>
-              <Select value={priority} onChange={setPriority} options={PRIORITIES} />
-            </div>
+            </label>
           </div>
-        </section>
 
-        {/* Methodology & Timeline */}
-        <section className="border-t border-border pt-6">
-          <h3 className="mb-4 text-sm font-semibold text-white">Methodology &amp; Timeline</h3>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            <div>
-              <label className="label-text">Methodology</label>
-              <Select value={methodology} onChange={setMethodology} options={METHODOLOGIES} />
-            </div>
-            <div>
-              <label className="label-text">Start Date</label>
-              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="input-field" />
-            </div>
-            <div>
-              <label className="label-text">End Date</label>
-              <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="input-field" />
-            </div>
+          <div className="form-actions" style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "16px" }}>
+            <Button type="button" variant="secondary" onClick={() => navigate("/projects")}>
+              Cancel
+            </Button>
+            <Button type="submit" icon={Rocket}>
+              Save Project
+            </Button>
           </div>
-        </section>
-
-        {/* Tech stack */}
-        <section className="border-t border-border pt-6">
-          <h3 className="mb-4 text-sm font-semibold text-white">Technology Stack</h3>
-          <div className="mb-3 flex flex-wrap gap-2">
-            {techStack.map((t) => (
-              <span
-                key={t}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border-strong bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary"
-              >
-                {t}
-                <button type="button" onClick={() => removeTech(t)} className="text-primary/70 hover:text-white">
-                  <X size={12} />
-                </button>
-              </span>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <input
-              value={techInput}
-              onChange={(e) => setTechInput(e.target.value)}
-              placeholder="Add a technology and press Add…"
-              className="input-field"
-            />
-            <button onClick={addTech} className="btn-secondary shrink-0">
-              Add
-            </button>
-          </div>
-        </section>
-
-        {/* Logo upload */}
-        <section className="border-t border-border pt-6">
-          <h3 className="mb-4 text-sm font-semibold text-white">Project Logo</h3>
-          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border-strong bg-white/[0.02] py-8 text-center transition-colors hover:border-primary hover:bg-primary/5">
-            <UploadCloud size={22} className="text-muted" />
-            <p className="text-sm text-muted">
-              {logoName ? logoName : 'Click to upload or drag and drop'}
-            </p>
-            <p className="text-[11px] text-muted/60">PNG or SVG, up to 2MB</p>
-            <input
-              type="file"
-              className="hidden"
-              accept="image/*"
-              onChange={(e) => setLogoName(e.target.files?.[0]?.name ?? null)}
-            />
-          </label>
-        </section>
-
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-3 border-t border-border pt-6">
-          <button type="button" onClick={() => navigate('/projects')} className="btn-secondary">
-            Cancel
-          </button>
-          <button type="submit" className="btn-primary">
-            Save Project
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </Card>
+    </WorkspaceLayout>
   );
 }

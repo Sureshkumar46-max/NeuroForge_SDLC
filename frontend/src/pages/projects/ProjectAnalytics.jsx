@@ -1,105 +1,129 @@
+import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   PieChart, Pie, Cell, Legend, BarChart, Bar,
-} from 'recharts';
-import { BarChart3, TrendingUp, Target, Activity } from 'lucide-react';
-import PageHeader from '../../components/projects/PageHeader.jsx';
-import { progressTrend, taskDistribution, healthByProject, activity, milestones } from '../../data/mockData.js';
+} from "recharts";
+import { TrendingUp, Target, Activity } from "lucide-react";
+import WorkspaceLayout from "../../components/WorkspaceLayout";
+import Card from "../../components/Card";
+import { progressTrend, activity, milestones } from "../../data/mockData.js";
+import { useAuth } from "../../context/AuthContext";
 
-const AXIS_COLOR = '#94A3B8';
-const GRID_COLOR = 'rgba(59,130,246,0.12)';
+const AXIS_COLOR = "#94A3B8";
+const GRID_COLOR = "rgba(59,130,246,0.12)";
 
-function ChartCard({ title, icon: Icon, children }) {
-  return (
-    <div className="surface-card p-5">
-      <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
-        <Icon size={16} className="text-primary" /> {title}
-      </h3>
-      {children}
-    </div>
-  );
-}
+function ProjectAnalytics() {
+  const { token } = useAuth();
+  const [taskDistribution, setTaskDistribution] = useState([]);
+  const [healthByProject, setHealthByProject] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-export default function ProjectAnalytics() {
+  useEffect(() => {
+    if (!token) return;
+
+    axios
+      .get("http://localhost:8080/api/analytics/overview", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        setTaskDistribution(res.data.taskDistribution || []);
+        setHealthByProject(res.data.healthByProject || []);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch analytics overview", err);
+        setError(err);
+      })
+      .finally(() => setLoading(false));
+  }, [token]);
+
   const upcoming = [...milestones].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).slice(0, 4);
 
   return (
-    <div>
-      <PageHeader
-        icon={BarChart3}
-        title="Project Analytics"
-        description="Delivery trends, task distribution and portfolio health."
-      />
-
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <ChartCard title="Project Progress" icon={TrendingUp}>
+    <WorkspaceLayout
+      title="Project Analytics"
+      subtitle="Delivery trends, task distribution and portfolio health."
+      pageClassName="project-analytics-page"
+    >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+        <Card title="Project Progress">
           <ResponsiveContainer width="100%" height={240}>
             <LineChart data={progressTrend}>
               <CartesianGrid stroke={GRID_COLOR} vertical={false} />
               <XAxis dataKey="month" stroke={AXIS_COLOR} fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke={AXIS_COLOR} fontSize={12} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ background: '#111827', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 10, fontSize: 12 }} />
+              <Tooltip contentStyle={{ background: "#111827", border: "1px solid rgba(59,130,246,0.25)", borderRadius: 10, fontSize: 12 }} />
               <Line type="monotone" dataKey="planned" stroke="#94A3B8" strokeWidth={2} dot={false} strokeDasharray="4 4" />
               <Line type="monotone" dataKey="completed" stroke="#3B82F6" strokeWidth={2.5} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
-        </ChartCard>
+        </Card>
 
-        <ChartCard title="Task Distribution" icon={Activity}>
-          <ResponsiveContainer width="100%" height={240}>
-            <PieChart>
-              <Pie data={taskDistribution} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={3}>
-                {taskDistribution.map((entry, i) => (
-                  <Cell key={i} fill={entry.color} stroke="#111827" strokeWidth={2} />
-                ))}
-              </Pie>
-              <Tooltip contentStyle={{ background: '#111827', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 10, fontSize: 12 }} />
-              <Legend wrapperStyle={{ fontSize: 12, color: AXIS_COLOR }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </ChartCard>
+        <Card title="Task Distribution">
+          {loading ? (
+            <p style={{ fontSize: 13, color: AXIS_COLOR }}>Loading...</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={240}>
+              <PieChart>
+                <Pie data={taskDistribution} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={3}>
+                  {taskDistribution.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} stroke="#111827" strokeWidth={2} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ background: "#111827", border: "1px solid rgba(59,130,246,0.25)", borderRadius: 10, fontSize: 12 }} />
+                <Legend wrapperStyle={{ fontSize: 12, color: AXIS_COLOR }} />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </Card>
 
-        <ChartCard title="Completion % by Project" icon={Target}>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={healthByProject} layout="vertical" margin={{ left: 8 }}>
-              <CartesianGrid stroke={GRID_COLOR} horizontal={false} />
-              <XAxis type="number" domain={[0, 100]} stroke={AXIS_COLOR} fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis dataKey="name" type="category" stroke={AXIS_COLOR} fontSize={11} tickLine={false} axisLine={false} width={110} />
-              <Tooltip contentStyle={{ background: '#111827', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 10, fontSize: 12 }} />
-              <Bar dataKey="health" radius={[0, 6, 6, 0]} fill="#3B82F6" />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartCard>
+        <Card title="Completion % by Project">
+          {loading ? (
+            <p style={{ fontSize: 13, color: AXIS_COLOR }}>Loading...</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={healthByProject} layout="vertical" margin={{ left: 8 }}>
+                <CartesianGrid stroke={GRID_COLOR} horizontal={false} />
+                <XAxis type="number" domain={[0, 100]} stroke={AXIS_COLOR} fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis dataKey="name" type="category" stroke={AXIS_COLOR} fontSize={11} tickLine={false} axisLine={false} width={110} />
+                <Tooltip contentStyle={{ background: "#111827", border: "1px solid rgba(59,130,246,0.25)", borderRadius: 10, fontSize: 12 }} />
+                <Bar dataKey="health" radius={[0, 6, 6, 0]} fill="#3B82F6" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </Card>
 
-        <ChartCard title="Recent Activity" icon={Activity}>
-          <div className="space-y-4">
+        <Card title="Recent Activity">
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {activity.map((a) => (
-              <div key={a.id} className="flex items-start gap-3 text-xs">
-                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+              <div key={a.id} style={{ display: "flex", alignItems: "flex-start", gap: "10px", fontSize: "13px" }}>
+                <span style={{ marginTop: "5px", width: "6px", height: "6px", borderRadius: "50%", background: "var(--brand)", flexShrink: 0 }} />
                 <div>
-                  <p className="text-white">{a.text}</p>
-                  <p className="mt-0.5 text-muted">{a.time}</p>
+                  <p style={{ margin: 0 }}>{a.text}</p>
+                  <p style={{ margin: 0, color: "var(--ink-soft)", fontSize: "11px" }}>{a.time}</p>
                 </div>
               </div>
             ))}
           </div>
-        </ChartCard>
+        </Card>
       </div>
 
-      <div className="surface-card mt-5 p-5">
-        <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
-          <Target size={16} className="text-primary" /> Upcoming Milestones
-        </h3>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {upcoming.map((m) => (
-            <div key={m.id} className="rounded-lg border border-border bg-white/[0.03] p-3.5">
-              <p className="truncate text-xs font-semibold text-white">{m.title}</p>
-              <p className="mt-1 text-[11px] text-muted">{m.project}</p>
-              <p className="mt-2 text-[11px] font-medium text-primary">Due {m.deadline}</p>
-            </div>
-          ))}
-        </div>
+      <div style={{ marginTop: "20px" }}>
+        <Card title="Upcoming Milestones">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px" }}>
+            {upcoming.map((m) => (
+              <div key={m.id} style={{ border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", padding: "14px", background: "rgba(255,255,255,0.03)" }}>
+                <p style={{ fontSize: "13px", fontWeight: 600, margin: 0 }}>{m.title}</p>
+                <p style={{ fontSize: "11px", color: "var(--ink-soft)", margin: "4px 0 0" }}>{m.project}</p>
+                <p style={{ fontSize: "11px", fontWeight: 600, color: "var(--brand)", margin: "8px 0 0" }}>Due {m.deadline}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
       </div>
-    </div>
+    </WorkspaceLayout>
   );
 }
+
+export default ProjectAnalytics;

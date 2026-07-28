@@ -1,184 +1,267 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Pencil, Archive, Trash2, Calendar, Users2, Layers,
   CheckCircle2, Clock, Bug, Gauge, ListChecks,
-} from 'lucide-react';
-import StatusBadge from '../../components/projects/StatusBadge.jsx';
-import HealthBadge from '../../components/projects/HealthBadge.jsx';
-import ProgressBar from '../../components/projects/ProgressBar.jsx';
-import AvatarGroup from '../../components/projects/AvatarGroup.jsx';
-import StatCard from '../../components/projects/StatCard.jsx';
-import EditProjectModal from '../../components/projects/EditProjectModal.jsx';
-import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
-import { useProjects } from '../../context/ProjectsContext.jsx';
-import { useWorkspace } from '../../context/WorkspaceContext.jsx';
+} from "lucide-react";
+import WorkspaceLayout from "../../components/WorkspaceLayout";
+import Card from "../../components/Card";
+import ConfirmDialog from "../../components/common/ConfirmDialog.jsx";
+import { useProjects } from "../../context/ProjectsContext.jsx";
 
-export default function ProjectDetails() {
+const healthColor = {
+  "On Track": "#10B981",
+  Delayed: "#EF4444",
+  "At Risk": "#F59E0B",
+};
+
+function ProjectDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { projects, updateProject, archiveProject, deleteProject } = useProjects();
-  const { pushNotification } = useWorkspace();
+  const { projects, archiveProject, deleteProject } = useProjects();
 
-  const project = projects.find((p) => p.id === id) ?? projects[0];
+  const project = projects.find((p) => String(p.id) === String(id));
 
-  const [editing, setEditing] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  const smallBtnStyle = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    padding: "6px 12px",
+    fontSize: "12px",
+    fontWeight: 600,
+    borderRadius: "8px",
+    border: "1px solid rgba(255,255,255,0.12)",
+    background: "rgba(255,255,255,0.03)",
+    color: "#fff",
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+  };
+
+  const dangerBtnStyle = {
+    ...smallBtnStyle,
+    border: "1px solid rgba(239,68,68,0.3)",
+    color: "#EF4444",
+    background: "rgba(239,68,68,0.08)",
+  };
+
   if (!project) {
     return (
-      <div className="surface-card p-8 text-center">
-        <p className="text-sm text-muted">This project no longer exists.</p>
-        <button onClick={() => navigate('/projects')} className="btn-secondary mt-4">
-          <ArrowLeft size={14} /> Back to Project Dashboard
-        </button>
-      </div>
+      <WorkspaceLayout title="Project not found" subtitle="">
+        <Card>
+          <div style={{ textAlign: "center", padding: "40px 0" }}>
+            <p style={{ color: "var(--ink-soft)" }}>This project no longer exists.</p>
+            <button style={{ ...smallBtnStyle, marginTop: "16px" }} onClick={() => navigate("/projects")}>
+              <ArrowLeft size={14} /> Back to Project Dashboard
+            </button>
+          </div>
+        </Card>
+      </WorkspaceLayout>
     );
   }
 
-  const handleSaveEdit = (patch) => {
-    updateProject(project.id, patch);
-    pushNotification(`Project Updated — "${patch.name}"`);
-    setEditing(false);
-  };
-
   const handleArchive = () => {
     archiveProject(project.id);
-    pushNotification(`Project Archived — "${project.name}"`);
     setConfirmArchive(false);
   };
 
   const handleDelete = () => {
     deleteProject(project.id);
     setConfirmDelete(false);
-    navigate('/projects');
+    navigate("/projects");
   };
 
+  const statBoxStyle = {
+    background: "rgba(255,255,255,0.03)",
+    borderRadius: "10px",
+    padding: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+  };
+
+  const techList = project.techStackTags
+    ? project.techStackTags.split(",").map((t) => t.trim()).filter(Boolean)
+    : [];
+
   return (
-    <div>
+    <WorkspaceLayout
+      title={project.name}
+      subtitle={`${project.organizationName || "—"} · ${project.teamName || "—"} · ${project.sprint || "—"}`}
+      pageClassName="project-details-page"
+      actions={
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <button style={smallBtnStyle} onClick={() => navigate("/projects/new")}>
+            <Pencil size={13} /> Edit
+          </button>
+          <button style={smallBtnStyle} onClick={() => setConfirmArchive(true)}>
+            <Archive size={13} /> Archive
+          </button>
+          <button style={dangerBtnStyle} onClick={() => setConfirmDelete(true)}>
+            <Trash2 size={13} /> Delete
+          </button>
+        </div>
+      }
+    >
       <button
-        onClick={() => navigate('/projects')}
-        className="mb-4 flex items-center gap-1.5 text-xs font-medium text-muted transition-colors hover:text-white"
+        onClick={() => navigate("/projects")}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          background: "transparent",
+          border: "none",
+          color: "var(--ink-soft)",
+          cursor: "pointer",
+          fontSize: "13px",
+          marginBottom: "16px",
+        }}
       >
         <ArrowLeft size={14} /> Back to Project Dashboard
       </button>
 
-      {/* Title block */}
-      <div className="surface-card mb-6 flex flex-col gap-4 p-6 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-hover shadow-glow">
-            <Layers size={20} className="text-white" />
-          </div>
-          <div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-xl font-bold text-white">{project.name}</h1>
-              <StatusBadge status={project.status} />
-            </div>
-            <p className="mt-1 text-xs text-muted">
-              {project.organization} · {project.team} · {project.sprint}
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "20px", alignItems: "start" }}>
+        {/* Left column */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <Card title="Description">
+            <p style={{ color: "var(--ink-soft)", lineHeight: 1.6 }}>
+              {project.description || "No description provided."}
             </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2.5">
-          <button onClick={() => setEditing(true)} className="btn-secondary">
-            <Pencil size={15} /> Edit
-          </button>
-          <button onClick={() => setConfirmArchive(true)} className="btn-secondary">
-            <Archive size={15} /> Archive
-          </button>
-          <button onClick={() => setConfirmDelete(true)} className="btn-danger-ghost">
-            <Trash2 size={15} /> Delete
-          </button>
-        </div>
-      </div>
+          </Card>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Left / main column */}
-        <div className="space-y-6 lg:col-span-2">
-          <div className="surface-card p-6">
-            <h3 className="mb-2 text-sm font-semibold text-white">Description</h3>
-            <p className="text-sm leading-relaxed text-muted">{project.description}</p>
-          </div>
-
-          <div className="surface-card p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white">Project Health &amp; Progress</h3>
-              <HealthBadge health={project.health} />
+          <Card title="Project Health & Progress">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+              <span style={{ fontSize: "13px", color: "var(--ink-soft)" }}>Progress</span>
+              <span
+                className="status-badge"
+                style={{
+                  background: `${healthColor[project.healthStatus] || "#64748B"}22`,
+                  color: healthColor[project.healthStatus] || "#64748B",
+                }}
+              >
+                {project.healthStatus || "—"}
+              </span>
             </div>
-            <ProgressBar value={project.progress} />
-            <div className="mt-4 grid grid-cols-3 gap-3 text-center text-xs">
-              <div className="rounded-lg bg-white/[0.03] py-2.5">
-                <p className="text-muted">Risk</p>
-                <p className="mt-0.5 font-semibold text-white">{project.risk}</p>
+            <div style={{ height: "8px", borderRadius: "4px", background: "rgba(255,255,255,0.08)", overflow: "hidden", marginBottom: "6px" }}>
+              <div
+                style={{
+                  height: "100%",
+                  width: `${project.progress ?? 0}%`,
+                  background: healthColor[project.healthStatus] || "#3B82F6",
+                  borderRadius: "4px",
+                }}
+              />
+            </div>
+            <p style={{ textAlign: "right", fontSize: "12px", color: "var(--ink-soft)", marginBottom: "16px" }}>
+              {project.progress ?? 0}%
+            </p>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+              <div style={{ textAlign: "center", background: "rgba(255,255,255,0.03)", borderRadius: "8px", padding: "10px" }}>
+                <p style={{ fontSize: "12px", color: "var(--ink-soft)" }}>Risk</p>
+                <p style={{ fontWeight: 600 }}>{project.riskLevel || "—"}</p>
               </div>
-              <div className="rounded-lg bg-white/[0.03] py-2.5">
-                <p className="text-muted">Budget Used</p>
-                <p className="mt-0.5 font-semibold text-white">{project.budgetUsed}%</p>
+              <div style={{ textAlign: "center", background: "rgba(255,255,255,0.03)", borderRadius: "8px", padding: "10px" }}>
+                <p style={{ fontSize: "12px", color: "var(--ink-soft)" }}>Budget Used</p>
+                <p style={{ fontWeight: 600 }}>{project.budgetUsed ?? 0}%</p>
               </div>
-              <div className="rounded-lg bg-white/[0.03] py-2.5">
-                <p className="text-muted">Methodology</p>
-                <p className="mt-0.5 font-semibold text-white">{project.methodology}</p>
+              <div style={{ textAlign: "center", background: "rgba(255,255,255,0.03)", borderRadius: "8px", padding: "10px" }}>
+                <p style={{ fontSize: "12px", color: "var(--ink-soft)" }}>Methodology</p>
+                <p style={{ fontWeight: 600 }}>{project.methodology || "—"}</p>
               </div>
             </div>
-          </div>
+          </Card>
 
-          <div className="surface-card p-6">
-            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-              <Users2 size={16} className="text-primary" /> Members
-            </h3>
-            <AvatarGroup members={project.members} max={8} />
-          </div>
+          <Card title="Project Manager">
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div
+                style={{
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "50%",
+                  background: "var(--brand)",
+                  color: "#fff",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {project.managerName ? project.managerName.slice(0, 2).toUpperCase() : "—"}
+              </div>
+              <span>{project.managerName || "Not assigned"}</span>
+            </div>
+          </Card>
 
-          <div className="surface-card p-6">
-            <h3 className="mb-3 text-sm font-semibold text-white">Technology Stack</h3>
-            <div className="flex flex-wrap gap-2">
-              {project.techStack.length === 0 ? (
-                <p className="text-xs text-muted">No technologies listed yet.</p>
+          <Card title="Technology Stack">
+            <div className="pill-row">
+              {techList.length === 0 ? (
+                <p style={{ color: "var(--ink-soft)", fontSize: "13px" }}>No technologies listed yet.</p>
               ) : (
-                project.techStack.map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-full border border-border-strong bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary"
-                  >
-                    {t}
-                  </span>
+                techList.map((t) => (
+                  <span key={t} className="pill">{t}</span>
                 ))
               )}
             </div>
-          </div>
+          </Card>
 
-          <div className="surface-card p-6">
-            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-              <Calendar size={16} className="text-primary" /> Timeline
-            </h3>
-            <div className="flex items-center gap-4 text-sm">
+          <Card title="Timeline">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
-                <p className="text-xs text-muted">Start Date</p>
-                <p className="font-medium text-white">{project.startDate || '—'}</p>
+                <p style={{ fontSize: "12px", color: "var(--ink-soft)" }}>Start Date</p>
+                <p style={{ fontWeight: 600 }}>{project.startDate || "—"}</p>
               </div>
-              <div className="h-px flex-1 bg-border" />
-              <div className="text-right">
-                <p className="text-xs text-muted">End Date</p>
-                <p className="font-medium text-white">{project.endDate || '—'}</p>
+              <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.1)", margin: "0 16px" }} />
+              <div style={{ textAlign: "right" }}>
+                <p style={{ fontSize: "12px", color: "var(--ink-soft)" }}>End Date</p>
+                <p style={{ fontWeight: 600 }}>{project.endDate || "—"}</p>
               </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Right column — stats */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={statBoxStyle}>
+            <ListChecks size={20} color="#3B82F6" />
+            <div>
+              <p style={{ fontSize: "12px", color: "var(--ink-soft)" }}>Total Tasks</p>
+              <strong style={{ fontSize: "18px" }}>{project.totalTasks ?? 0}</strong>
+            </div>
+          </div>
+          <div style={statBoxStyle}>
+            <CheckCircle2 size={20} color="#10B981" />
+            <div>
+              <p style={{ fontSize: "12px", color: "var(--ink-soft)" }}>Completed</p>
+              <strong style={{ fontSize: "18px" }}>{project.completedTasks ?? 0}</strong>
+            </div>
+          </div>
+          <div style={statBoxStyle}>
+            <Clock size={20} color="#F59E0B" />
+            <div>
+              <p style={{ fontSize: "12px", color: "var(--ink-soft)" }}>Pending</p>
+              <strong style={{ fontSize: "18px" }}>{project.pendingTasks ?? 0}</strong>
+            </div>
+          </div>
+          <div style={statBoxStyle}>
+            <Bug size={20} color="#EF4444" />
+            <div>
+              <p style={{ fontSize: "12px", color: "var(--ink-soft)" }}>Bugs</p>
+              <strong style={{ fontSize: "18px" }}>{project.bugs ?? 0}</strong>
+            </div>
+          </div>
+          <div style={statBoxStyle}>
+            <Gauge size={20} color="#3B82F6" />
+            <div>
+              <p style={{ fontSize: "12px", color: "var(--ink-soft)" }}>Velocity</p>
+              <strong style={{ fontSize: "18px" }}>{project.velocity ?? 0} pts/sprint</strong>
             </div>
           </div>
         </div>
-
-        {/* Right / stats column */}
-        <div className="space-y-4">
-          <StatCard icon={ListChecks} label="Total Tasks" value={project.stats.totalTasks} tone="primary" />
-          <StatCard icon={CheckCircle2} label="Completed" value={project.stats.completed} tone="success" />
-          <StatCard icon={Clock} label="Pending" value={project.stats.pending} tone="warning" />
-          <StatCard icon={Bug} label="Bugs" value={project.stats.bugs} tone="danger" />
-          <StatCard icon={Gauge} label="Velocity" value={`${project.stats.velocity} pts/sprint`} tone="primary" />
-        </div>
       </div>
-
-      {editing && (
-        <EditProjectModal project={project} onSave={handleSaveEdit} onClose={() => setEditing(false)} />
-      )}
 
       <ConfirmDialog
         open={confirmArchive}
@@ -199,6 +282,8 @@ export default function ProjectDetails() {
         onConfirm={handleDelete}
         onCancel={() => setConfirmDelete(false)}
       />
-    </div>
+    </WorkspaceLayout>
   );
 }
+
+export default ProjectDetails;

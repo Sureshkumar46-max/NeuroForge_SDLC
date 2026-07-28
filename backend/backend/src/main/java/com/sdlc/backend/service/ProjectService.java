@@ -4,9 +4,11 @@ import com.sdlc.backend.dto.CreateProjectRequest;
 import com.sdlc.backend.model.Organization;
 import com.sdlc.backend.model.Project;
 import com.sdlc.backend.model.Team;
+import com.sdlc.backend.model.User;
 import com.sdlc.backend.repository.OrganizationRepository;
 import com.sdlc.backend.repository.ProjectRepository;
 import com.sdlc.backend.repository.TeamRepository;
+import com.sdlc.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,9 @@ public class ProjectService {
     @Autowired
     private TeamRepository teamRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     // Get All Projects
     public List<Project> getAllProjects(Long orgId) {
         return projectRepository.findByOrganizationId(orgId);
@@ -40,12 +45,39 @@ public class ProjectService {
 
         Project project = new Project();
         project.setName(request.getName());
+        project.setDescription(request.getDescription());
         project.setMethodology(request.getMethodology());
         project.setStartDate(request.getStartDate());
         project.setEndDate(request.getEndDate());
         project.setTechStackTags(request.getTechStackTags());
+        project.setPriority(request.getPriority());
+
+        // Defaults for a new project
+        project.setStatus("Active");
         project.setHealthStatus("On Track");
+        project.setRiskLevel("Low");
+        project.setProgress(0);
+        project.setBudgetUsed(0);
+        project.setSprint("Sprint 1");
+        project.setTotalTasks(0);
+        project.setCompletedTasks(0);
+        project.setPendingTasks(0);
+        project.setBugs(0);
+        project.setVelocity(0);
+
         project.setOrganization(organization);
+
+        if (request.getTeamId() != null) {
+            Team team = teamRepository.findByIdAndOrganizationId(request.getTeamId(), orgId)
+                    .orElseThrow(() -> new RuntimeException("Team not found"));
+            project.setTeam(team);
+        }
+
+        if (request.getManagerId() != null) {
+            User manager = userRepository.findById(request.getManagerId())
+                    .orElseThrow(() -> new RuntimeException("Manager not found"));
+            project.setProjectManager(manager);
+        }
 
         return projectRepository.save(project);
     }
@@ -55,9 +87,6 @@ public class ProjectService {
 
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
-
-        System.out.println("JWT OrgId = " + orgId);
-        System.out.println("Project OrgId = " + project.getOrganization().getId());
 
         if (!project.getOrganization().getId().equals(orgId)) {
             throw new RuntimeException("Access Denied");
@@ -72,10 +101,24 @@ public class ProjectService {
         Project project = getProjectById(id, orgId);
 
         project.setName(request.getName());
+        project.setDescription(request.getDescription());
         project.setMethodology(request.getMethodology());
         project.setStartDate(request.getStartDate());
         project.setEndDate(request.getEndDate());
         project.setTechStackTags(request.getTechStackTags());
+        project.setPriority(request.getPriority());
+
+        if (request.getTeamId() != null) {
+            Team team = teamRepository.findByIdAndOrganizationId(request.getTeamId(), orgId)
+                    .orElseThrow(() -> new RuntimeException("Team not found"));
+            project.setTeam(team);
+        }
+
+        if (request.getManagerId() != null) {
+            User manager = userRepository.findById(request.getManagerId())
+                    .orElseThrow(() -> new RuntimeException("Manager not found"));
+            project.setProjectManager(manager);
+        }
 
         return projectRepository.save(project);
     }

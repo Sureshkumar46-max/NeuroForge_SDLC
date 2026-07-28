@@ -7,6 +7,7 @@ import {
   UserPlus,
   UserRound,
   Users,
+  FolderKanban,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Sidebar from "./Sidebar";
@@ -43,13 +44,25 @@ const navItems = [
       { label: "Invite Members", icon: UserPlus, to: "/members/invite" },
     ],
   },
+  {
+    label: "Project & Portfolio",
+    icon: FolderKanban,
+    to: "/projects",
+    children: [
+      { label: "Project Dashboard", icon: LayoutDashboard, to: "/projects" },
+      { label: "Create Project", icon: PlusCircle, to: "/projects/new" },
+      { label: "Portfolio View", icon: FolderKanban, to: "/portfolio" },
+      { label: "Milestones", icon: LayoutDashboard, to: "/milestones" },
+      { label: "Analytics", icon: FolderKanban, to: "/analytics" },
+    ],
+  },
 ];
 
 function WorkspaceLayout({ title, subtitle, actions, children, pageClassName = "" }) {
   const { user } = useAuth();
   const [navOpen, setNavOpen] = useState(false);
 
-  if (user && !(["Super Admin", "Org Admin"].includes(user.role))) {
+  if (user && !(["Super Admin", "Org Admin", "PM"].includes(user.role))) {
     return (
       <div className="workspace-shell access-denied-shell">
         <div className="workspace-card access-denied-card fade-in-up">

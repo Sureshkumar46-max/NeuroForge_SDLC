@@ -18,4 +18,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     long countByOrganizationId(Long orgId);
 
     long countByOrganizationIdAndHealthStatus(Long orgId, String healthStatus);
+
+    List<Project> findByOrganization_Id(Long orgId);
 }

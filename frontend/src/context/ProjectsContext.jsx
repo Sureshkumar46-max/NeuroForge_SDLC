@@ -1,82 +1,94 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { projects as seedProjects } from '../data/mockData.js';
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import axios from "axios";
 
-const STORAGE_KEY = 'neuroforge_m3_projects';
+const API_BASE = "http://localhost:8080/api/projects";
 
 const ProjectsContext = createContext(null);
 
-function loadInitial() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch {
-    // fall through to seed data
-  }
-  return seedProjects;
+function getAuthHeader() {
+  const token = sessionStorage.getItem("nf_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export function initialsFromName(name = '') {
+export function initialsFromName(name = "") {
   return name
     .trim()
     .split(/\s+/)
     .map((p) => p[0])
     .filter(Boolean)
     .slice(0, 2)
-    .join('')
+    .join("")
     .toUpperCase();
 }
 
 export function ProjectsProvider({ children }) {
-  const [projects, setProjects] = useState(loadInitial);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchProjects = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await axios.get(API_BASE, { headers: getAuthHeader() });
+      setProjects(res.data);
+    } catch (err) {
+      console.error("Failed to fetch projects:", err);
+      setError(err.response?.data || err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-    } catch {
-      // storage may be unavailable — fail silently, state still works in-memory
-    }
-  }, [projects]);
+    fetchProjects();
+  }, [fetchProjects]);
 
-  const addProject = useCallback((data) => {
-    const id = `prj-${Date.now().toString(36)}`;
-    const managerInitials = initialsFromName(data.manager?.name || data.manager || '');
-    const newProject = {
-      id,
-      name: data.name || 'Untitled Project',
-      organization: data.organization,
-      team: data.team,
-      manager: { name: data.manager, initials: managerInitials },
-      members: [{ initials: managerInitials }],
-      sprint: 'Sprint 1',
-      status: 'Active',
-      progress: 0,
-      health: 'On Track',
-      budgetUsed: 0,
-      risk: 'Low',
+  const addProject = useCallback(async (data) => {
+    const payload = {
+      name: data.name,
+      description: data.description,
       methodology: data.methodology,
+      startDate: data.startDate || null,
+      endDate: data.endDate || null,
+      techStackTags: Array.isArray(data.techStack) ? data.techStack.join(",") : data.techStack,
       priority: data.priority,
-      startDate: data.startDate || '',
-      endDate: data.endDate || '',
-      stats: { totalTasks: 0, completed: 0, pending: 0, bugs: 0, velocity: 0 },
-      techStack: data.techStack || [],
-      description: data.description || '',
+      teamId: data.teamId || null,
+      managerId: data.managerId || null,
     };
-    setProjects((prev) => [newProject, ...prev]);
-    return newProject;
+    const res = await axios.post(API_BASE, payload, { headers: getAuthHeader() });
+    setProjects((prev) => [res.data, ...prev]);
+    return res.data;
   }, []);
 
-  const updateProject = useCallback((id, patch) => {
-    setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+  const updateProject = useCallback(async (id, patch) => {
+    const payload = {
+      name: patch.name,
+      description: patch.description,
+      methodology: patch.methodology,
+      startDate: patch.startDate || null,
+      endDate: patch.endDate || null,
+      techStackTags: Array.isArray(patch.techStack) ? patch.techStack.join(",") : patch.techStack,
+      priority: patch.priority,
+      teamId: patch.teamId || null,
+      managerId: patch.managerId || null,
+    };
+    const res = await axios.put(`${API_BASE}/${id}`, payload, { headers: getAuthHeader() });
+    setProjects((prev) => prev.map((p) => (p.id === id ? res.data : p)));
+    return res.data;
   }, []);
 
-  const archiveProject = useCallback((id) => {
-    setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, status: 'Archived' } : p)));
+  const archiveProject = useCallback(async (id) => {
+    const res = await axios.put(
+      `${API_BASE}/${id}`,
+      { status: "Archived" },
+      { headers: getAuthHeader() }
+    );
+    setProjects((prev) => prev.map((p) => (p.id === id ? res.data : p)));
   }, []);
 
-  const deleteProject = useCallback((id) => {
+  const deleteProject = useCallback(async (id) => {
+    await axios.delete(`${API_BASE}/${id}`, { headers: getAuthHeader() });
     setProjects((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
@@ -84,7 +96,17 @@ export function ProjectsProvider({ children }) {
 
   return (
     <ProjectsContext.Provider
-      value={{ projects, addProject, updateProject, archiveProject, deleteProject, getProject }}
+      value={{
+        projects,
+        loading,
+        error,
+        addProject,
+        updateProject,
+        archiveProject,
+        deleteProject,
+        getProject,
+        refetch: fetchProjects,
+      }}
     >
       {children}
     </ProjectsContext.Provider>
@@ -93,6 +115,6 @@ export function ProjectsProvider({ children }) {
 
 export function useProjects() {
   const ctx = useContext(ProjectsContext);
-  if (!ctx) throw new Error('useProjects must be used within a ProjectsProvider');
+  if (!ctx) throw new Error("useProjects must be used within a ProjectsProvider");
   return ctx;
 }
