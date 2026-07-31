@@ -12,6 +12,7 @@ import {
   UserRound,
   UserPlus,
   PlusCircle,
+  Zap,
 } from 'lucide-react';
 import { useWorkspaceUI } from '../context/WorkspaceUIContext.jsx';
 
@@ -35,6 +36,7 @@ const navSections = [
       { to: '/portfolio', label: 'Portfolio', icon: Briefcase },
       { to: '/milestones', label: 'Milestones', icon: Target },
       { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+      { to: '/agile/sprints', label: 'Agile Planning', icon: Zap },
     ],
   },
 ];

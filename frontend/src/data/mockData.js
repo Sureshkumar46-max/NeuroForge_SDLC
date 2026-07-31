@@ -173,3 +173,104 @@ export const taskDistribution = [
 ];
 
 export const healthByProject = projects.map((p) => ({ name: p.name.split(' ').slice(0, 2).join(' '), health: p.progress }));
+
+export const members = [
+  { id: 'AK', name: 'Aditi Kapoor', initials: 'AK', gradient: 'from-blue-500 to-purple-500' },
+  { id: 'RS', name: 'Rohan Shetty', initials: 'RS', gradient: 'from-green-500 to-teal-500' },
+  { id: 'PV', name: 'Priya Verma', initials: 'PV', gradient: 'from-pink-500 to-rose-500' },
+  { id: 'MJ', name: 'Meera Joshi', initials: 'MJ', gradient: 'from-yellow-500 to-orange-500' },
+  { id: 'TN', name: 'Tanmay Nair', initials: 'TN', gradient: 'from-indigo-500 to-blue-500' },
+  { id: 'IJ', name: 'Ishaan Jain', initials: 'IJ', gradient: 'from-red-500 to-pink-500' },
+  { id: 'KN', name: 'Kavya Nambiar', initials: 'KN', gradient: 'from-purple-500 to-indigo-500' },
+];
+
+export function memberById(id) {
+  return members.find((m) => m.id === id);
+}
+
+export const initialTasks = [
+  {
+    id: 'ORI-101',
+    title: 'Design login screen',
+    priority: 'high',
+    points: 3,
+    assignee: 'AK',
+    labels: ['UI'],
+    status: 'backlog',
+    due: '2026-08-05',
+    comments: 2,
+    attachments: 1,
+    subtasks: '1/3',
+  },
+  {
+    id: 'ORI-102',
+    title: 'Setup CI/CD pipeline',
+    priority: 'medium',
+    points: 5,
+    assignee: 'TN',
+    labels: ['DevOps'],
+    status: 'in-progress',
+    due: '2026-08-10',
+    comments: 0,
+    attachments: 0,
+    subtasks: '0/2',
+  },
+  {
+    id: 'ORI-103',
+    title: 'Fix checkout bug',
+    priority: 'critical',
+    points: 2,
+    assignee: 'PV',
+    labels: ['Bug'],
+    status: 'done',
+    due: '2026-07-30',
+    comments: 4,
+    attachments: 2,
+    subtasks: '2/2',
+  },
+];
+export const LABELS = ['UI', 'Backend', 'API', 'Bug', 'DevOps', 'Docs', 'Security', 'Performance'];
+export const PRIORITY_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
+export const BOARD_COLUMNS = [
+  { id: 'backlog', title: 'Backlog' },
+  { id: 'in-progress', title: 'In Progress' },
+  { id: 'review', title: 'In Review' },
+  { id: 'done', title: 'Done' },
+];
+export const initialNotifications = [
+  { id: 1, text: 'You were assigned a new task', time: '10 min ago', read: false },
+  { id: 2, text: 'Sprint planning meeting tomorrow at 10 AM', time: '1 hr ago', read: false },
+  { id: 3, text: 'Your PR was approved', time: '3 hr ago', read: true },
+];
+export const sprintHistory = [
+  {
+    id: 'sprint-1',
+    name: 'Sprint 6',
+    startDate: '2026-06-01',
+    endDate: '2026-06-14',
+    status: 'Completed',
+    plannedPoints: 40,
+    completedPoints: 38,
+    velocity: 38,
+  },
+  {
+    id: 'sprint-2',
+    name: 'Sprint 7',
+    startDate: '2026-06-15',
+    endDate: '2026-06-28',
+    status: 'Completed',
+    plannedPoints: 42,
+    completedPoints: 40,
+    velocity: 40,
+  },
+  {
+    id: 'sprint-3',
+    name: 'Sprint 8',
+    startDate: '2026-06-29',
+    endDate: '2026-07-12',
+    status: 'Active',
+    plannedPoints: 45,
+    completedPoints: 27,
+    velocity: null,
+  },
+];

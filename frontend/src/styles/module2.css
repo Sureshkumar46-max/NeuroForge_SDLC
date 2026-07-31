@@ -996,7 +996,7 @@ a:focus-visible {
 }
 
 .sidebar-section.expanded .sidebar-subnav {
-  max-height: 180px;
+  max-height: 420px;
   opacity: 1;
   transform: translateY(0);
 }

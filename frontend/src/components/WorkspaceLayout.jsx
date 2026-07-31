@@ -8,6 +8,7 @@ import {
   UserRound,
   Users,
   FolderKanban,
+  Zap,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Sidebar from "./Sidebar";
@@ -54,6 +55,18 @@ const navItems = [
       { label: "Portfolio View", icon: FolderKanban, to: "/portfolio" },
       { label: "Milestones", icon: LayoutDashboard, to: "/milestones" },
       { label: "Analytics", icon: FolderKanban, to: "/analytics" },
+    ],
+  },
+  {
+    label: "Agile Planning",
+    icon: Zap,
+    to: "/agile/sprints",
+    children: [
+      { label: "Sprint Dashboard", icon: LayoutDashboard, to: "/agile/sprints" },
+      { label: "Backlog", icon: FolderKanban, to: "/agile/backlog" },
+      { label: "Kanban Board", icon: FolderKanban, to: "/agile/board" },
+      { label: "Sprint Planning", icon: PlusCircle, to: "/agile/sprints/planning" },
+      { label: "Sprint History", icon: LayoutDashboard, to: "/agile/sprints/history" },
     ],
   },
 ];
