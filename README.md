@@ -1,99 +1,80 @@
-# NeuroForge — Module 3: Project & Portfolio Management (Frontend)
+# NeuroForge — Module 6: AI Ticket Triage & Smart Assignment
 
-A **standalone** Module 3 frontend — no Module 2 code, pages, or routes are mixed in.
-It's built to plug into your existing Module 2 app (React + Vite + Tailwind) and match
-its dark navy / electric-blue enterprise theme, but this package only contains Module 3.
+Frontend-only implementation of Module 6, built to match the existing NeuroForge
+shell (dark navy, blue accents, sidebar/topbar/card system) shown in the reference
+video and blueprint doc.
 
-Run it on its own to preview:
+## Run standalone
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
+npm run dev
 ```
 
-## What's inside (Module 3 only)
+Opens at `http://localhost:5173`, redirects to `/ticket-triage`.
+
+## Integrating into the real NeuroForge project
+
+This package is structured so you drop the Module 6 pieces into the existing repo
+and skip everything that's just here to make the package runnable on its own:
+
+**Copy in as-is:**
+- `src/pages/TicketTriage.jsx`
+- `src/components/ticket-triage/*` (TicketDetails, AISuggestionPanel, AIReasoning,
+  ConfidenceScore, TriageQueue, CreateTicketModal)
+- `src/data/mockData.js` — swap for real API responses when the backend lands
+- `src/api/ticketTriageApi.js` — stub functions with the exact shape the real
+  endpoints should return; replace the mock bodies with real `fetch()` calls,
+  nothing else needs to change
+- The Module 6 block in `src/styles/layout.css` (everything is scoped, but check
+  for class name collisions — `.card`, `.badge`, `.btn` etc. are generic and were
+  written to match the existing app's own class names, so the real project likely
+  already has equivalents)
+
+**Do NOT copy — the real project already has these:**
+- `src/components/layout/Sidebar.jsx`, `Topbar.jsx`, `AppShell.jsx` — instead, add
+  the single `AI Ticket Triage` `<NavLink to="/ticket-triage">` entry into the
+  existing Sidebar's nav list
+- `src/pages/PlaceholderPage.jsx` — only exists so this package runs standalone
+- `src/App.jsx`'s placeholder routes — just add the one `/ticket-triage` route to
+  the existing router
+- `src/components/ui/Button.jsx`, `Badge.jsx`, `Toast.jsx` — if the existing project
+  has equivalents, use those; the class names here (`btn`, `btn-primary`, `badge`,
+  `status-badge`) were chosen to match what's already in the app
+
+## Folder structure
 
 ```
 src/
-  layout/
-    AppLayout.jsx      Shell combining Sidebar + Header — only here so this
-                        package is previewable standalone. Replace with your
-                        real Module 2 layout when integrating (see below).
-    Sidebar.jsx         Same fixed/collapsible sidebar behavior as Module 2,
-                        containing ONLY the 4 Module 3 nav items.
-    Header.jsx          Org dropdown, search, notification bell, compact profile.
-  components/projects/
-    ProjectCard.jsx      Glassmorphism card used on Project Dashboard
-    StatusBadge.jsx      Active / On Hold / Completed / Archived pill
-    HealthBadge.jsx      On Track / At Risk / Delayed / Completed pill
-    ProgressBar.jsx      Gradient progress bar (color shifts with %)
-    AvatarGroup.jsx      Overlapping member avatars with "+N" overflow
-    PageHeader.jsx        Icon + title + description + action slot
-    StatCard.jsx          Small metric tile (icon, label, value)
-  pages/projects/
-    ProjectDashboard.jsx    Project cards grid, filters, search, summary stats
-    CreateProject.jsx       Enterprise create-project form
-    ProjectDetails.jsx      Atlassian-style detail view with stats rail
-    PortfolioDashboard.jsx  Filterable/sortable portfolio grid
-    Milestones.jsx          Timeline of milestone cards
-    ProjectAnalytics.jsx    Recharts dashboard
-  data/mockData.js         All mock projects, milestones, activity, chart data
-  App.jsx                  Routes — Module 3 only:
-                            /projects, /projects/new, /projects/:id,
-                            /portfolio, /milestones, /analytics
+ ├── api/
+ │    └── ticketTriageApi.js       # stubbed endpoints, swap for real fetch() later
+ ├── data/
+ │    └── mockData.js              # ticket, AI suggestion, team, and queue mock data
+ ├── components/
+ │    ├── layout/                  # Sidebar, Topbar, AppShell (existing shell, reused)
+ │    ├── ui/                      # Button, Badge, Toast — shared primitives
+ │    └── ticket-triage/
+ │         ├── TicketDetails.jsx
+ │         ├── AISuggestionPanel.jsx
+ │         ├── AIReasoning.jsx
+ │         ├── ConfidenceScore.jsx
+ │         ├── TriageQueue.jsx
+ │         └── CreateTicketModal.jsx
+ ├── pages/
+ │    ├── TicketTriage.jsx         # Module 6 page — wires everything together
+ │    └── PlaceholderPage.jsx      # standalone-only stand-in for other modules
+ └── styles/
+      ├── theme.css                # color/type/spacing tokens
+      └── layout.css                # component styles (sidebar, cards, badges, table, modal, toast)
 ```
 
-There is **no** Dashboard / Organizations / Teams / Members page or route in this
-package — those belong to your Module 2 codebase and are intentionally left out.
+## Notes
 
-## Integrating into your Module 2 project (nothing gets overwritten)
-
-1. Copy these three folders straight into your existing `src/`:
-   - `src/components/projects/`
-   - `src/pages/projects/`
-   - `src/data/mockData.js`
-   None of these touch your existing files — they're new, separate paths.
-2. In your **existing** sidebar component, append the 4 items from
-   `navSections` in this package's `Sidebar.jsx` (`Project Dashboard`, `Portfolio`,
-   `Milestones`, `Analytics` — icons: `FolderKanban`, `Briefcase`, `Target`, `BarChart3`)
-   to your current nav list. Don't replace your Module 2 items — add alongside them.
-3. In your **existing** router, add the 6 routes listed in this package's `App.jsx`
-   under your current Module 2 routes. Nothing about your existing routes changes.
-4. **Tailwind tokens** — if your `tailwind.config.js` doesn't already define these
-   (they match your palette exactly), add them:
-
-```js
-colors: {
-  base: '#050B18',
-  sidebar: '#08111F',
-  card: '#111827',
-  border: {
-    DEFAULT: 'rgba(59,130,246,0.18)',
-    strong: 'rgba(59,130,246,0.35)'
-  },
-  primary: {
-    DEFAULT: '#3B82F6',
-    hover: '#2563EB'
-  },
-  muted: '#94A3B8',
-  success: '#22C55E',
-  warning: '#F59E0B',
-  danger: '#EF4444',
-}
-```
-
-The reusable classes (`.surface-card`, `.btn-primary`, `.btn-secondary`, `.input-field`,
-`.label-text`) are defined in `src/index.css` inside an `@layer components` block —
-copy that block into your existing global stylesheet if you don't already have equivalents.
-
-5. **Wire up real data**: every page currently imports from `src/data/mockData.js`.
-   Swap those imports for your real API calls / state — the shape of `projects[0]`
-   in that file documents every field each component expects.
-
-## Fidelity to Module 2
-
-Matched by reviewing your Module 2 walkthrough video: fixed sidebar that never
-scrolls (only content scrolls), user card pinned at the bottom, compact non-stretching
-profile chip top-right, org switcher pill, dark navy cards (`#111827`) with thin blue
-border, `rounded-xl`, hover lift + glow, same button language (blue gradient primary /
-ghost secondary / subtle danger), Inter typeface, Lucide icons throughout.
+- No backend calls are made. `src/api/ticketTriageApi.js` simulates latency with
+  `setTimeout` so the loading/analyzing states are visible; point it at real
+  endpoints when they exist.
+- The "Analyzing ticket..." step sequence in `AISuggestionPanel` is driven by
+  `TicketTriage.jsx`'s `triggerAnalysis()` — timed to roughly match the AI request
+  round trip, not hardcoded to a fixed duration.
+- Category/Priority badge colors, status badge colors, and the AI purple/blue accent
+  all come from CSS custom properties in `theme.css` — change them there, not per-component.
